@@ -1,0 +1,36 @@
+# Dateiname: .eslintignore
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Package manager
+package-lock.json
+yarn.lock
+
+# Test outputs
+.nyc_output
+
+# Environment files (optional, falls sie Syntax-Fehler haben könnten)
+.env*

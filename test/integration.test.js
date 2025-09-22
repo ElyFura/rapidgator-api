@@ -22,17 +22,19 @@ describe('RapidGator Integration Tests', () => {
 
     beforeEach(() => {
         if (!api) {
-            pending('Integration-Tests übersprungen');
+            // Jest-kompatible Art, Tests zu überspringen
+            test.skip('Integration tests skipped - no credentials', () => {});
+
         }
     });
 
-    test('should login successfully', async () => {
+    (api ? test : test.skip)('should login successfully', async () => {
         const result = await api.login();
         expect(result.token).toBeDefined();
         expect(typeof result.token).toBe('string');
     }, 10000);
 
-    test('should get user info after login', async () => {
+    (api ? test : test.skip)('should get user info after login', async () => {
         await api.login();
         const userInfo = await api.getUserInfo();
 
@@ -41,7 +43,7 @@ describe('RapidGator Integration Tests', () => {
         expect(typeof userInfo.is_premium).toBe('boolean');
     }, 10000);
 
-    test('should check API health', async () => {
+    (api ? test : test.skip)('should check API health', async () => {
         const isHealthy = await api.healthCheck();
         expect(typeof isHealthy).toBe('boolean');
     }, 5000);

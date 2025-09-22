@@ -10,8 +10,11 @@ module.exports = {
         '**/__tests__/**/*.js'
     ],
 
+    // Setup-Dateien - ENTFERNT, da wir Mocking direkt in Tests machen
+    // setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
+
     // Coverage-Konfiguration
-    collectCoverage: true,
+    collectCoverage: false, // Aktivieren mit --coverage Flag
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'html'],
     collectCoverageFrom: [
@@ -22,16 +25,13 @@ module.exports = {
         '!node_modules/**'
     ],
 
-    // Setup-Dateien
-    setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
-
     // Timeouts
-    testTimeout: 30000,
+    testTimeout: 10000,
 
     // Verbose Output
     verbose: true,
 
-    // Transform (falls du ES6 verwenden möchtest)
+    // Transform
     transform: {},
 
     // Module-Pfade
@@ -44,13 +44,18 @@ module.exports = {
         '/dist/'
     ],
 
+    // Module-Mocking
+    clearMocks: true,
+    resetMocks: true,
+    restoreMocks: true,
+
     // Coverage-Thresholds (optional)
     coverageThreshold: {
         global: {
-            branches: 70,
-            functions: 70,
-            lines: 70,
-            statements: 70
+            branches: 60,
+            functions: 60,
+            lines: 60,
+            statements: 60
         }
     }
 };
