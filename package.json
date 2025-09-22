@@ -1,1 +1,60 @@
-rapidgator-api
+{
+    "name": "rapidgator-api",
+    "version": "1.0.0",
+    "description": "Eine vollständige JavaScript-Bibliothek für die RapidGator API v2",
+    "main": "index.js",
+    "types": "types/index.d.ts",
+    "scripts": {
+        "test": "jest",
+        "build": "npm run build:node && npm run build:browser",
+        "build:node": "echo 'Node.js build ready'",
+        "build:browser": "browserify index.js -o dist/rapidgator-api.min.js",
+        "prepublishOnly": "npm test",
+        "example:basic": "node examples/basic-usage.js",
+        "example:upload": "node examples/upload-example.js"
+    },
+    "keywords": [
+        "rapidgator",
+        "api",
+        "file-hosting",
+        "upload",
+        "download",
+        "file-sharing",
+        "storage",
+        "premium"
+    ],
+    "author": "ElyFura",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ElyFura/rapidgator-api.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ElyFura/rapidgator-api/issues"
+    },
+    "homepage": "https://github.com/ElyFura/rapidgator-api#readme",
+    "dependencies": {
+        "node-fetch": "^3.3.2",
+        "form-data": "^4.0.0"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "browserify": "^17.0.0",
+        "@types/node": "^20.8.0"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    },
+    "files": [
+        "index.js",
+        "lib/",
+        "types/",
+        "examples/",
+        "README.md",
+        "LICENSE"
+    ],
+    "browser": {
+        "node-fetch": false,
+        "form-data": false
+    }
+}
