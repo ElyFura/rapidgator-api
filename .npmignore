@@ -1,0 +1,29 @@
+# Dateiname: .npmignore
+
+# Development
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Tests
+test/
+coverage/
+.nyc_output
+
+# Build tools
+.babelrc
+webpack.config.js
+rollup.config.js
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Examples (optional - entfernen wenn du sie mit veröffentlichen willst)
+# examples/
+
+# Logs
+*.log
+npm-debug.log*
