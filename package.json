@@ -66,17 +66,5 @@
     "browser": {
         "node-fetch": false,
         "form-data": false
-    },
-    "jest": {
-        "testEnvironment": "node",
-        "setupFilesAfterEnv": ["<rootDir>/test/setup.js"],
-        "testTimeout": 30000,
-        "collectCoverageFrom": [
-            "lib/**/*.js",
-            "index.js",
-            "!test/**",
-            "!coverage/**",
-            "!node_modules/**"
-        ]
     }
 }
