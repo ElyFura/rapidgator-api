@@ -16,11 +16,7 @@ async function uploadExample() {
         fs.writeFileSync(testFile, 'Dies ist eine Test-Datei für den RapidGator Upload!');
 
         console.log('📤 Datei hochladen...');
-        const uploadResult = await api.uploadFileNode(testFile, 'mein-test-upload.txt', null, (progress) => {
-            if (progress) {
-                console.log(`📊 Upload-Fortschritt: ${progress.progress || 'N/A'}%`);
-            }
-        });
+        const uploadResult = await api.uploadFileNode(testFile, 'mein-test-upload.txt', null);
 
         console.log('✅ Upload erfolgreich!');
         console.log('🆔 Datei-ID:', uploadResult.fileId);

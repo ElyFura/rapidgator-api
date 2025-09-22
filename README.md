@@ -212,10 +212,7 @@ Datei aus Node.js hochladen.
 const result = await api.uploadFileNode(
     './meine-datei.pdf',           // Dateipfad
     'custom-name.pdf',             // Optionaler Name
-    'folder123',                   // Optionale Ordner-ID
-    (progress) => {                // Progress-Callback
-        console.log(`Upload: ${progress}%`);
-    }
+    'folder123'
 );
 
 console.log('Datei-ID:', result.fileId);
@@ -442,12 +439,7 @@ Alle Upload- und Batch-Operationen unterstützen Progress-Callbacks:
 ### Upload-Progress
 
 ```javascript
-const result = await api.uploadFileNode('./large-file.zip', null, null, (progress) => {
-    console.log(`📤 Upload: ${progress}%`);
-
-    // Progress-Bar aktualisieren
-    document.getElementById('progressBar').style.width = `${progress}%`;
-});
+const result = await api.uploadFileNode('./large-file.zip', null, null);
 ```
 
 ### Batch-Progress
