@@ -23,18 +23,17 @@ describe('RapidGator Integration Tests', () => {
     beforeEach(() => {
         if (!api) {
             // Jest-kompatible Art, Tests zu überspringen
-            test.skip('Integration tests skipped - no credentials', () => {});
 
         }
     });
 
-    (api ? test : test.skip)('should login successfully', async () => {
+    (process.env.RAPIDGATOR_TEST_LOGIN && process.env.RAPIDGATOR_TEST_PASSWORD ? test : test.skip)('should login successfully', async () => {
         const result = await api.login();
         expect(result.token).toBeDefined();
         expect(typeof result.token).toBe('string');
     }, 10000);
 
-    (api ? test : test.skip)('should get user info after login', async () => {
+    (process.env.RAPIDGATOR_TEST_LOGIN && process.env.RAPIDGATOR_TEST_PASSWORD ? test : test.skip)('should get user info after login', async () => {
         await api.login();
         const userInfo = await api.getUserInfo();
 
@@ -43,7 +42,7 @@ describe('RapidGator Integration Tests', () => {
         expect(typeof userInfo.is_premium).toBe('boolean');
     }, 10000);
 
-    (api ? test : test.skip)('should check API health', async () => {
+    (process.env.RAPIDGATOR_TEST_LOGIN && process.env.RAPIDGATOR_TEST_PASSWORD ? test : test.skip)('should check API health', async () => {
         const isHealthy = await api.healthCheck();
         expect(typeof isHealthy).toBe('boolean');
     }, 5000);
