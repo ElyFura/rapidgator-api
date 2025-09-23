@@ -5,7 +5,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   release:
@@ -17,12 +21,15 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Use Node.js 18.x
+    - name: Use Node.js 20
       uses: actions/setup-node@v4
       with:
-        node-version: 18.x
+        node-version: 20
         cache: 'npm'
         registry-url: 'https://registry.npmjs.org'
+
+    - name: Update npm
+      run: npm install -g npm@latest
 
     - name: Install dependencies
       run: npm ci
