@@ -3,7 +3,6 @@
 ![NPM Version](https://img.shields.io/npm/v/rapidgator-api)
 ![NPM License](https://img.shields.io/npm/l/rapidgator-api)
 ![NPM Downloads](https://img.shields.io/npm/dm/rapidgator-api)
-![Release](https://img.shields.io/github/actions/workflow/status/ElyFura/main/build)
 
 Eine vollständige JavaScript-Bibliothek für die RapidGator API v2. Unterstützt sowohl Node.js als auch Browser-Umgebungen mit TypeScript-Support.
 
@@ -848,10 +847,8 @@ await api.login();
 
 ## 📞 Support & Community
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/username/rapidgator-api/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/username/rapidgator-api/discussions)
-- 📧 **Email**: deine.email@example.com
-- 💬 **Discord**: [Community Server](https://discord.gg/rapidgator-api)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/elyfura/rapidgator-api/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/elyfura/rapidgator-api/discussions)
 
 ## 📄 Changelog
 
@@ -873,7 +870,7 @@ Beiträge sind willkommen! Bitte lese die [CONTRIBUTING.md](CONTRIBUTING.md) fü
 
 ```bash
 # Development Setup
-git clone https://github.com/username/rapidgator-api.git
+git clone https://github.com/elyfura/rapidgator-api.git
 cd rapidgator-api
 npm install
 npm run dev
