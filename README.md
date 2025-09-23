@@ -3,7 +3,7 @@
 ![NPM Version](https://img.shields.io/npm/v/rapidgator-api)
 ![NPM License](https://img.shields.io/npm/l/rapidgator-api)
 ![NPM Downloads](https://img.shields.io/npm/dm/rapidgator-api)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ElyFura/main/build)
+![Release](https://img.shields.io/github/actions/workflow/status/ElyFura/main/build)
 
 Eine vollständige JavaScript-Bibliothek für die RapidGator API v2. Unterstützt sowohl Node.js als auch Browser-Umgebungen mit TypeScript-Support.
 
