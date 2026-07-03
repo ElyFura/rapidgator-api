@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: npm
     permissions:
+      id-token: write
       contents: write
       pull-requests: write
       repository-projects: write
@@ -70,7 +71,8 @@ jobs:
         draft: false
         prerelease: false
 
+    # OIDC Trusted Publishing: kein Token nötig. npm (>= 11.5.1) tauscht den
+    # GitHub-OIDC-Token (id-token: write) gegen kurzlebige Credentials und
+    # erzeugt automatisch Provenance. NODE_AUTH_TOKEN darf NICHT gesetzt sein.
     - name: Publish to NPM
       run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_RAPID }}
