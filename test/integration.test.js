@@ -38,7 +38,8 @@ describe('RapidGator Integration Tests', () => {
         const userInfo = await api.getUserInfo();
 
         expect(userInfo).toBeDefined();
-        expect(userInfo.login).toBe(process.env.RAPIDGATOR_TEST_LOGIN);
+        // Die API liefert das User-Objekt mit 'email' (kein 'login'-Feld)
+        expect(typeof userInfo.email).toBe('string');
         expect(typeof userInfo.is_premium).toBe('boolean');
     }, 10000);
 

@@ -191,7 +191,7 @@ Benutzerinformationen abrufen.
 const userInfo = await api.getUserInfo();
 console.log('Premium:', userInfo.is_premium);
 console.log('Email:', userInfo.email);
-console.log('Traffic übrig:', userInfo.traffic_left);
+console.log('Traffic übrig:', userInfo.traffic.left);
 ```
 
 #### `isPremium()`
@@ -244,9 +244,9 @@ Informationen zu einer Datei abrufen.
 
 ```javascript
 const fileInfo = await api.getFileInfo('abc123xyz');
-console.log('Dateiname:', fileInfo.filename);
+console.log('Dateiname:', fileInfo.name);
 console.log('Größe:', api.formatFileSize(fileInfo.size));
-console.log('Upload-Datum:', fileInfo.upload_date);
+console.log('Upload-Datum:', new Date(fileInfo.created * 1000).toISOString());
 ```
 
 #### `getDownloadUrl(fileId)`
@@ -255,7 +255,7 @@ Download-Link für eine Datei generieren.
 ```javascript
 const downloadInfo = await api.getDownloadUrl('abc123xyz');
 console.log('Download URL:', downloadInfo.download_url);
-console.log('Gültig bis:', downloadInfo.expire_date);
+console.log('Wartezeit (Sek.):', downloadInfo.delay);
 ```
 
 #### `deleteFile(fileId)`
@@ -274,7 +274,7 @@ const files = await api.getFileList(1, 50, 'folder123');
 console.log(`Gefundene Dateien: ${files.files.length}`);
 
 files.files.forEach(file => {
-    console.log(`- ${file.filename} (${api.formatFileSize(file.size)})`);
+    console.log(`- ${file.name} (${api.formatFileSize(file.size)})`);
 });
 ```
 
@@ -383,7 +383,7 @@ Datei-Informationen direkt aus URL abrufen.
 ```javascript
 const url = 'https://rapidgator.net/file/abc123xyz/test.zip';
 const fileInfo = await api.getFileInfoFromUrl(url);
-console.log('Dateiname:', fileInfo.filename);
+console.log('Dateiname:', fileInfo.name);
 ```
 
 #### `isValidFileId(fileId)`
@@ -557,9 +557,9 @@ async function completeUploadWorkflow() {
         // 6. Datei-Informationen anzeigen
         const fileInfo = await api.getFileInfo(uploadResult.fileId);
         console.log('📋 Datei-Details:');
-        console.log(`   Name: ${fileInfo.filename}`);
+        console.log(`   Name: ${fileInfo.name}`);
         console.log(`   Größe: ${api.formatFileSize(fileInfo.size)}`);
-        console.log(`   Upload: ${fileInfo.upload_date}`);
+        console.log(`   Upload: ${new Date(fileInfo.created * 1000).toISOString()}`);
 
         return {
             fileId: uploadResult.fileId,
@@ -749,7 +749,7 @@ describe('RapidGatorAPI', () => {
 
     test('should initialize with correct default options', () => {
         expect(api.baseURL).toBe('https://rapidgator.net/api/v2');
-        expect(api.login).toBe('test_login');
+        expect(api.username).toBe('test_login');
         expect(api.password).toBe('test_password');
     });
 
@@ -851,6 +851,14 @@ await api.login();
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/elyfura/rapidgator-api/discussions)
 
 ## 📄 Changelog
+
+### v1.1.0
+- ✨ Upload implementiert: `uploadFileNode`, `uploadFile`, `initUpload` (inkl. MD5-Hash & Instant-Upload)
+- ✨ Ordner-Management: `createFolder`, `getFolderContent`, `deleteFolder`
+- ✨ Datei-Listing: `getFileList`, `getAllFiles` (automatische Paginierung)
+- ✨ Batch-Operationen: `batchDeleteFiles`, `batchGetDownloadUrls`
+- ✨ `refreshSession` (Re-Login mit gespeicherten Zugangsdaten)
+- 🐛 Fix: FormData-Import (wurde nie einer Variable zugewiesen)
 
 ### v1.0.0
 - ✨ Initiales Release

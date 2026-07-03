@@ -14,11 +14,15 @@ export interface LoginResponse {
 }
 
 export interface UserInfo {
-    is_premium: boolean;
-    login: string;
     email: string;
-    expire_date?: string;
-    traffic_left?: number;
+    is_premium: boolean;
+    premium_end_time?: number | null;
+    state?: number;
+    state_label?: string;
+    traffic?: { total: number | null; left: number | null };
+    storage?: { total: string; left: number };
+    upload?: { max_file_size: number; nb_pipes: number };
+    remote_upload?: { max_nb_jobs: number; refresh_time: number };
     // weitere Eigenschaften...
 }
 
@@ -36,10 +40,14 @@ export interface UploadResult {
 
 export interface FileInfo {
     file_id: string;
-    filename: string;
+    name: string;
+    hash: string;
     size: number;
-    upload_date: string;
-    download_url?: string;
+    created: number;
+    mode?: number;
+    mode_label?: string;
+    folder_id?: string;
+    url?: string;
     // weitere Eigenschaften...
 }
 
@@ -66,7 +74,7 @@ export declare class RapidGatorAPI {
     getUserInfo(): Promise<UserInfo>;
     isPremium(): Promise<boolean>;
 
-    initUpload(filename: string, filesize: number, folderId?: string): Promise<UploadInfo>;
+    initUpload(filename: string, filesize: number, folderId?: string, hash?: string): Promise<UploadInfo>;
     uploadFile(file: File, folderId?: string, onProgress?: (progress: number) => void): Promise<UploadResult>;
     uploadFileNode(filePath: string, filename?: string, folderId?: string, onProgress?: (progress: any) => void): Promise<UploadResult>;
 
@@ -76,7 +84,7 @@ export declare class RapidGatorAPI {
 
     createFolder(name: string, parentId?: string): Promise<any>;
     getFolderContent(folderId?: string): Promise<any>;
-    deleteFolder(folderId: string): Promise<any>;
+    deleteFolder(folderId: string | string[]): Promise<any>;
 
     getFileList(page?: number, perPage?: number, folderId?: string): Promise<any>;
     getAllFiles(folderId?: string, onProgress?: (progress: any) => void): Promise<FileInfo[]>;
@@ -103,7 +111,12 @@ export declare const utils: {
     retry<T>(fn: () => Promise<T>, retries?: number, delay?: number): Promise<T>;
     ProgressTracker: any;
     RateLimiter: any;
-    validateConfig(config: any): string[];
+    validateConfig(config: any): { isValid: boolean; errors: string[] };
+    generateHash(length?: number): string;
+    buildApiUrl(baseUrl: string, endpoint: string, params?: Record<string, any>): string;
+    handleApiError(error: any, context?: string): Error;
+    detectFileType(filename: string): string;
+    md5(input: string | ArrayLike<number>): string;
 };
 
 export default RapidGatorAPI;

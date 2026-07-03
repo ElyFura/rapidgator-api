@@ -115,6 +115,255 @@ describe('RapidGatorAPI', () => {
         });
     });
 
+    describe('Upload', () => {
+        const os = require('os');
+        const fs = require('fs');
+        const path = require('path');
+
+        beforeEach(() => {
+            api.setToken('test_token');
+        });
+
+        test('initUpload should register a session and normalize upload_url', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: { upload: { upload_id: 'u1', url: 'http://up.example/x', state: 0 } }
+                })
+            });
+
+            const info = await api.initUpload('a.txt', 100, null, 'deadbeef');
+            expect(info.upload_id).toBe('u1');
+            expect(info.upload_url).toBe('http://up.example/x');
+            expect(info.state).toBe(0);
+        });
+
+        test('uploadFileNode should short-circuit on instant upload (state DONE)', async () => {
+            const tmpFile = path.join(os.tmpdir(), `rg-test-${process.pid}.txt`);
+            fs.writeFileSync(tmpFile, 'hello rapidgator');
+
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: { upload: { upload_id: 'u2', state: 2, file: { file_id: 'abc123' } } }
+                })
+            });
+
+            const progress = [];
+            const result = await api.uploadFileNode(tmpFile, null, null, (p) => progress.push(p));
+
+            expect(result.fileId).toBe('abc123');
+            expect(result.uploadResult).toBeNull();
+            expect(progress).toContain(100);
+            // Nur der initUpload-Request, kein Byte-Upload / Polling
+            expect(mockFetch).toHaveBeenCalledTimes(1);
+
+            fs.unlinkSync(tmpFile);
+        });
+
+        test('uploadFileNode should throw for missing file', async () => {
+            await expect(api.uploadFileNode('/does/not/exist.txt')).rejects.toThrow('Datei nicht gefunden');
+        });
+    });
+
+    describe('Folders & Listing', () => {
+        beforeEach(() => {
+            api.setToken('test_token');
+        });
+
+        test('createFolder should call folder/create', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: { folder_id: 'f1' }
+                })
+            });
+
+            const folder = await api.createFolder('Neuer Ordner', 'parent1');
+            expect(folder.folder_id).toBe('f1');
+
+            // Parent muss als parent_folder_id gesendet werden (offizielle API-Doku)
+            const body = mockFetch.mock.calls[0][1].body.toString();
+            expect(body).toContain('parent_folder_id=parent1');
+        });
+
+        test('getFolderContent should normalize files/folders', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: {
+                        folder: { files: [{ file_id: 'a' }, { file_id: 'b' }], folders: [{ folder_id: 'x' }] },
+                        pager: { current: 1, total: 1 }
+                    }
+                })
+            });
+
+            const content = await api.getFolderContent('f1');
+            expect(content.files).toHaveLength(2);
+            expect(content.folders).toHaveLength(1);
+            expect(content.pager.current).toBe(1);
+        });
+
+        test('getAllFiles should stop after the last page', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: {
+                        folder: { files: [{ file_id: 'a' }], folders: [] },
+                        pager: { current: 1, total: 1 }
+                    }
+                })
+            });
+
+            const all = await api.getAllFiles();
+            expect(all).toHaveLength(1);
+            expect(mockFetch).toHaveBeenCalledTimes(1);
+        });
+
+        test('getAllFiles should follow multiple pages (pager.current < pager.total)', async () => {
+            mockFetch
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: jest.fn().mockResolvedValue({
+                        status: 200,
+                        response: { folder: { files: [{ file_id: 'a' }], folders: [] }, pager: { current: 1, total: 2 } }
+                    })
+                })
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: jest.fn().mockResolvedValue({
+                        status: 200,
+                        response: { folder: { files: [{ file_id: 'b' }], folders: [] }, pager: { current: 2, total: 2 } }
+                    })
+                });
+
+            const all = await api.getAllFiles();
+            expect(all.map(f => f.file_id)).toEqual(['a', 'b']);
+            expect(mockFetch).toHaveBeenCalledTimes(2);
+        });
+    });
+
+    describe('Batch Operations', () => {
+        beforeEach(() => {
+            api.setToken('test_token');
+        });
+
+        test('batchDeleteFiles should report per-file success and failure', async () => {
+            mockFetch
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: jest.fn().mockResolvedValue({ response_status: 200, response: {} })
+                })
+                .mockResolvedValue({
+                    ok: true,
+                    json: jest.fn().mockResolvedValue({ response_status: 404, response_details: 'not found' })
+                });
+
+            const progress = [];
+            const results = await api.batchDeleteFiles(['ok', 'bad'], (p) => progress.push(p));
+
+            expect(results[0]).toMatchObject({ fileId: 'ok', success: true });
+            expect(results[1].success).toBe(false);
+            expect(results[1].error).toContain('not found');
+            expect(progress[progress.length - 1].progress).toBe(100);
+        });
+
+        test('batchGetDownloadUrls should extract download_url', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: { download_url: 'http://dl/1' }
+                })
+            });
+
+            const results = await api.batchGetDownloadUrls(['f1']);
+            expect(results[0].success).toBe(true);
+            expect(results[0].downloadUrl).toBe('http://dl/1');
+        });
+    });
+
+    describe('Session', () => {
+        test('refreshSession should re-login with stored credentials', async () => {
+            api.setToken('old_token');
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    response_status: 200,
+                    response: { token: 'new_token', session_id: 's2' }
+                })
+            });
+
+            const result = await api.refreshSession();
+            expect(result.token).toBe('new_token');
+            expect(api.token).toBe('new_token');
+        });
+    });
+
+    describe('Response envelope & unwrapping', () => {
+        beforeEach(() => api.setToken('test_token'));
+
+        test('makeRequest should accept the official status/details envelope', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({ status: 200, response: { ok: 1 }, details: null })
+            });
+
+            const result = await api.makeRequest('/test', 'GET');
+            expect(result).toEqual({ ok: 1 });
+        });
+
+        test('makeRequest should surface the official error envelope', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({ status: 401, details: 'Bad token' })
+            });
+
+            // retryCount 0, damit der Test nicht durch Retries verzögert wird
+            await expect(api.makeRequest('/test', 'GET', null, 0)).rejects.toThrow('API Error: Bad token');
+        });
+
+        test('getUserInfo should unwrap response.user', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({ status: 200, response: { user: { email: 'a@b.c', is_premium: true } } })
+            });
+
+            const info = await api.getUserInfo();
+            expect(info.email).toBe('a@b.c');
+            expect(info.is_premium).toBe(true);
+        });
+
+        test('isPremium should read the unwrapped user object', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({ status: 200, response: { user: { is_premium: true } } })
+            });
+
+            expect(await api.isPremium()).toBe(true);
+        });
+
+        test('getFileInfo should send token and unwrap response.file', async () => {
+            mockFetch.mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({ status: 200, response: { file: { file_id: 'x', name: 'a.exe', size: 10 } } })
+            });
+
+            const file = await api.getFileInfo('x');
+            expect(file.name).toBe('a.exe');
+            expect(file.size).toBe(10);
+
+            const body = mockFetch.mock.calls[0][1].body.toString();
+            expect(body).toContain('token=test_token');
+            expect(body).toContain('file_id=x');
+        });
+    });
+
     describe('API Requests', () => {
         test('makeRequest should handle successful response', async () => {
             const mockResponse = {
@@ -300,6 +549,21 @@ describe('Utils', () => {
             });
 
             expect(url).toBe('https://api.test.com/endpoint?param1=value1&param2=value2');
+        });
+
+        test('md5 should match known vectors (string input)', () => {
+            expect(utils.md5('')).toBe('d41d8cd98f00b204e9800998ecf8427e');
+            expect(utils.md5('abc')).toBe('900150983cd24fb0d6963f7d28e17f72');
+            expect(utils.md5('The quick brown fox jumps over the lazy dog'))
+                .toBe('9e107d9d372bb6826bd81d3542a419d6');
+        });
+
+        test('md5 should accept byte arrays and match Node crypto', () => {
+            const crypto = require('crypto');
+            const buf = Buffer.from('hello rapidgator upload test', 'utf8');
+            const expected = crypto.createHash('md5').update(buf).digest('hex');
+            expect(utils.md5(buf)).toBe(expected);
+            expect(utils.md5(new Uint8Array(buf))).toBe(expected);
         });
 
         test('detectFileType should detect file types', () => {
