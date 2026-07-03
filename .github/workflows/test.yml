@@ -123,6 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]')
+    environment: npm
     permissions:
       contents: write
 
