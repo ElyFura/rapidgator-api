@@ -852,7 +852,7 @@ await api.login();
 
 ## 📄 Changelog
 
-### v1.1.0
+### v1.0.3
 - ✨ Upload implementiert: `uploadFileNode`, `uploadFile`, `initUpload` (inkl. MD5-Hash & Instant-Upload)
 - ✨ Ordner-Management: `createFolder`, `getFolderContent`, `deleteFolder`
 - ✨ Datei-Listing: `getFileList`, `getAllFiles` (automatische Paginierung)
