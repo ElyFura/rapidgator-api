@@ -1,6 +1,6 @@
 {
     "name": "rapidgator-api",
-    "version": "1.1.0",
+    "version": "1.0.3",
     "description": "Eine vollständige JavaScript-Bibliothek für die RapidGator API v2",
     "main": "index.js",
     "types": "types/index.d.ts",
